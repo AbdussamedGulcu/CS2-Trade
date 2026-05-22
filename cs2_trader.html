@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS2 Skin Trader</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Inter:wght@400;500&display=swap');
+:root {
+  --bg0:#0a0b0e; --bg1:#111318; --bg2:#181b22; --bg3:#1e2230;
+  --border:#2a2f3f; --border2:#343b50;
+  --accent:#e8a020; --accent2:#c47a10;
+  --steam:#4ea1db; --steam2:#2d7fb0;
+  --csfloat:#60c070; --csfloat2:#3d9a50;
+  --red:#e04848; --green:#50c878;
+  --text:#d0d4e0; --text2:#7a8098; --text3:#4a5068;
+  --mono:'Share Tech Mono',monospace;
+  --head:'Rajdhani',sans-serif;
+  --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg0);color:var(--text);font-family:var(--body);font-size:14px;min-height:100vh;}
+.app{display:flex;flex-direction:column;min-height:100vh;}
+
+/* Topbar */
+.topbar{background:var(--bg1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:24px;height:56px;position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--head);font-size:22px;font-weight:700;letter-spacing:1px;color:var(--accent);white-space:nowrap;}
+.logo span{color:var(--text2);font-weight:400;font-size:14px;margin-left:6px;}
+.balances{display:flex;gap:12px;margin-left:auto;}
+.bal-pill{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-family:var(--mono);font-size:13px;}
+.bal-pill .lbl{color:var(--text2);font-size:11px;font-family:var(--body);}
+.bal-steam{color:var(--steam);} .bal-cash{color:var(--csfloat);}
+
+/* Nav */
+nav{background:var(--bg1);border-bottom:1px solid var(--border);display:flex;gap:2px;padding:0 24px;}
+.nav-btn{padding:10px 18px;font-family:var(--head);font-size:15px;font-weight:600;letter-spacing:.5px;color:var(--text2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+main{flex:1;padding:24px;max-width:1100px;margin:0 auto;width:100%;}
+.panel{display:none;} .panel.active{display:block;}
+
+/* Cards */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+.card-title{font-family:var(--head);font-size:16px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;}
+.stat-tile{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.stat-tile .lbl{color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.stat-tile .val{font-family:var(--mono);font-size:22px;color:var(--text);}
+.stat-tile .val.green{color:var(--green);} .stat-tile .val.steam{color:var(--steam);}
+.stat-tile .val.cash{color:var(--csfloat);} .stat-tile .val.amber{color:var(--accent);}
+
+/* Forms */
+.form-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px;}
+.field label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;}
+.field input,.field select{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:13px;outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field select option{background:var(--bg2);}
+
+/* Buttons */
+.btn{padding:9px 18px;border-radius:6px;border:none;font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:opacity .15s,transform .1s;}
+.btn:active{transform:scale(0.97);} .btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-accent{background:var(--accent);color:#000;} .btn-steam{background:var(--steam);color:#000;}
+.btn-csfloat{background:var(--csfloat);color:#000;} .btn-danger{background:var(--red);color:#fff;}
+.btn-ghost{background:var(--bg3);border:1px solid var(--border2);color:var(--text);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--bg2);color:var(--text2);text-transform:uppercase;font-size:11px;letter-spacing:.8px;padding:8px 10px;text-align:left;font-family:var(--body);font-weight:500;}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg2);}
+tr.row-selected td{background:rgba(232,160,32,.06);}
+.mono{font-family:var(--mono);}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:var(--body);letter-spacing:.5px;}
+.tag-steam{background:rgba(78,161,219,.15);color:var(--steam);}
+.tag-csfloat{background:rgba(96,192,112,.15);color:var(--csfloat);}
+.tag-other{background:rgba(200,200,200,.08);color:var(--text2);}
+.tag-buy{background:rgba(78,161,219,.12);color:var(--steam);}
+.tag-sell{background:rgba(96,192,112,.12);color:var(--csfloat);}
+.pos{color:var(--green);} .neg{color:var(--red);}
+
+/* Checkbox */
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);}
+
+/* Bulk toolbar */
+.bulk-bar{display:none;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--accent);border-radius:8px;padding:10px 16px;margin-bottom:12px;flex-wrap:wrap;}
+.bulk-bar.visible{display:flex;}
+.bulk-bar .bc{font-size:13px;color:var(--accent);font-weight:600;margin-right:4px;}
+
+/* Commission calc */
+.calc-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:12px;}
+.calc-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;}
+.calc-row .ck{color:var(--text2);} .calc-row .cv{font-family:var(--mono);}
+.calc-divider{border-top:1px solid var(--border);margin:6px 0;}
+.calc-net{font-size:16px;font-family:var(--mono);color:var(--green);}
+.compare{margin-top:12px;padding:10px 14px;border-radius:6px;background:var(--bg3);font-size:13px;color:var(--text2);}
+
+/* Empty */
+.empty{text-align:center;padding:48px 0;color:var(--text3);}
+.empty .icon{font-size:36px;margin-bottom:8px;}
+
+/* Toast notification */
+#notif{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-size:13px;max-width:320px;transform:translateY(80px);opacity:0;transition:transform .25s,opacity .25s;z-index:9999;}
+#notif.show{transform:translateY(0);opacity:1;}
+#notif.ok{border-color:var(--green);color:var(--green);}
+#notif.err{border-color:var(--red);color:var(--red);}
+
+/* ── Modal System ── */
+#modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:5000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{
+  background:var(--bg1);border:1px solid var(--border2);border-radius:14px;
+  padding:28px 28px 22px;width:420px;max-width:95vw;
+  transform:translateY(20px) scale(.97);transition:transform .2s;
+}
+#modal-overlay.open .modal-box{transform:translateY(0) scale(1);}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+.modal-title{font-family:var(--head);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:.5px;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;line-height:1;transition:color .15s;}
+.modal-close:hover{color:var(--text);}
+.modal-body{margin-bottom:20px;color:var(--text2);font-size:14px;line-height:1.6;}
+.modal-body .field{margin-bottom:12px;}
+.modal-body .field:last-child{margin-bottom:0;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;}
+.modal-divider{border-top:1px solid var(--border);margin:14px 0;}
+.modal-info{background:var(--bg2);border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:13px;margin-bottom:12px;}
+.modal-info .mi-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--text2);}
+.modal-info .mi-row span:last-child{color:var(--text);}
+.modal-info .mi-row.highlight span:last-child{color:var(--green);font-weight:600;}
+.modal-warn{background:rgba(224,72,72,.08);border:1px solid rgba(224,72,72,.25);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;}
+
+/* CSV drop */
+.drop-area{border:2px dashed var(--border2);border-radius:8px;padding:24px;text-align:center;color:var(--text2);cursor:pointer;transition:border-color .15s;margin-bottom:12px;}
+.drop-area:hover{border-color:var(--accent);color:var(--text);}
+.drop-area input[type=file]{display:none;}
+
+/* Preview bar */
+.preview-bar{background:var(--bg2);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text2);min-height:36px;display:flex;align-items:center;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo">CS2 TRADER <span>simülatör</span></div>
+  <div class="balances">
+    <div class="bal-pill"><span class="lbl">STEAM</span><span class="bal-steam mono" id="hdr-steam">$0.00</span></div>
+    <div class="bal-pill"><span class="lbl">CASH</span><span class="bal-cash mono" id="hdr-cash">$0.00</span></div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <button class="nav-btn active" onclick="goto('dashboard',this)">Genel Bakış</button>
+  <button class="nav-btn" onclick="goto('calc',this)">Hesaplayıcı</button>
+  <button class="nav-btn" onclick="goto('inventory',this)">Envanter</button>
+  <button class="nav-btn" onclick="goto('trade',this)">Al / Sat</button>
+  <button class="nav-btn" onclick="goto('history',this)">Geçmiş</button>
+  <button class="nav-btn" onclick="goto('settings',this)">Ayarlar</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="panel-dashboard" class="panel active">
+  <div class="stats-grid">
+    <div class="stat-tile"><div class="lbl">Steam Bakiyesi</div><div class="val steam" id="s-steam">$0.00</div></div>
+    <div class="stat-tile"><div class="lbl">Cash Bakiyesi</div><div class="val cash" id="s-cash">$0.00</div></div>
+    <div class="stat-tile"><div class="lbl">Envanter (adet)</div><div class="val amber" id="s-inv">0</div></div>
+    <div class="stat-tile"><div class="lbl">Toplam Alış Maliyeti</div><div class="val" id="s-cost">$0.00</div></div>
+    <div class="stat-tile"><div class="lbl">Toplam Gerçekleşen K/Z</div><div class="val" id="s-pnl">$0.00</div></div>
+    <div class="stat-tile"><div class="lbl">Win Rate</div><div class="val" id="s-wr">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Son İşlemler</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Zaman</th><th>İşlem</th><th>Eşya</th><th>Platform</th><th>Net</th><th>K/Z</th></tr></thead>
+        <tbody id="dash-hist"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- HESAPLAYICI -->
+<div id="panel-calc" class="panel">
+  <div class="card">
+    <div class="card-title">Komisyon Hesaplayıcı</div>
+    <div class="form-row">
+      <div class="field" style="flex:2">
+        <label>Eşya Adı (opsiyonel)</label>
+        <input id="calc-name" placeholder="AK-47 | Redline">
+      </div>
+      <div class="field">
+        <label>Satış Fiyatı ($) — birim</label>
+        <input id="calc-price" type="number" step="0.01" min="0.01" placeholder="45.00" oninput="runCalc()">
+      </div>
+      <div class="field">
+        <label>Alış Fiyatı ($) — birim (opsiyonel)</label>
+        <input id="calc-buy" type="number" step="0.01" min="0" placeholder="40.00" oninput="runCalc()">
+      </div>
+      <div class="field" style="max-width:100px">
+        <label>Adet</label>
+        <input id="calc-qty" type="number" step="1" min="1" value="1" oninput="runCalc()">
+      </div>
+    </div>
+    <button class="btn btn-accent" onclick="runCalc()">HESAPLA</button>
+
+    <div class="calc-box" id="calc-result" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-family:var(--head);color:var(--steam);font-size:14px;font-weight:700;margin-bottom:8px">STEAM (<span id="cr-s-rate">%15</span>)</div>
+          <div class="calc-row"><span class="ck">Birim Fiyat</span><span class="cv" id="cr-s-unit">—</span></div>
+          <div class="calc-row" id="cr-s-qty-row"><span class="ck">Adet</span><span class="cv" id="cr-s-qty">—</span></div>
+          <div class="calc-row"><span class="ck">Toplam Fiyat</span><span class="cv" id="cr-s-price">—</span></div>
+          <div class="calc-row"><span class="ck">Komisyon</span><span class="cv neg" id="cr-s-com">—</span></div>
+          <div class="calc-divider"></div>
+          <div class="calc-row"><span class="ck">Net Kazanç</span><span class="calc-net" id="cr-s-net">—</span></div>
+          <div class="calc-row" id="cr-s-pnl-row"><span class="ck">K/Z</span><span class="cv" id="cr-s-pnl">—</span></div>
+        </div>
+        <div>
+          <div style="font-family:var(--head);color:var(--csfloat);font-size:14px;font-weight:700;margin-bottom:8px">CSFLOAT (<span id="cr-c-rate">%2</span>)</div>
+          <div class="calc-row"><span class="ck">Birim Fiyat</span><span class="cv" id="cr-c-unit">—</span></div>
+          <div class="calc-row" id="cr-c-qty-row"><span class="ck">Adet</span><span class="cv" id="cr-c-qty">—</span></div>
+          <div class="calc-row"><span class="ck">Toplam Fiyat</span><span class="cv" id="cr-c-price">—</span></div>
+          <div class="calc-row"><span class="ck">Komisyon</span><span class="cv neg" id="cr-c-com">—</span></div>
+          <div class="calc-divider"></div>
+          <div class="calc-row"><span class="ck">Net Kazanç</span><span class="calc-net" id="cr-c-net">—</span></div>
+          <div class="calc-row" id="cr-c-pnl-row"><span class="ck">K/Z</span><span class="cv" id="cr-c-pnl">—</span></div>
+        </div>
+      </div>
+      <div class="compare" id="calc-compare"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ENVANTER -->
+<div id="panel-inventory" class="panel">
+  <div class="card">
+    <div class="card-title">Envanter</div>
+
+    <!-- Toplu işlem araç çubuğu -->
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bc" id="bulk-count">0 seçili</span>
+      <button class="btn btn-danger" style="padding:6px 14px;font-size:13px" onclick="bulkDelete()">🗑 Toplu Sil</button>
+      <button class="btn btn-steam" style="padding:6px 14px;font-size:13px" onclick="bulkSell('Steam')">⬆ Steam'de Sat</button>
+      <button class="btn btn-csfloat" style="padding:6px 14px;font-size:13px" onclick="bulkSell('CSFloat')">⬆ CSFloat'ta Sat</button>
+      <button class="btn btn-ghost" style="padding:6px 14px;font-size:13px;margin-left:auto" onclick="clearSelection()">✕ Seçimi Kaldır</button>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:12px;margin-top:0">
+      <button class="btn btn-ghost" onclick="showCsvImport()">📂 CSV İçe Aktar</button>
+      <button class="btn btn-ghost" onclick="showManualAddModal()">+ Manuel Ekle</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:36px"><input type="checkbox" id="chk-all" onchange="toggleSelectAll(this.checked)"></th>
+          <th>#</th><th>Eşya Adı</th><th>Alış ($)</th><th>Platform</th>
+          <th>Steam Net</th><th>CSFloat Net</th><th>Tarih</th><th></th>
+        </tr></thead>
+        <tbody id="inv-tbody"></tbody>
+      </table>
+    </div>
+    <div id="inv-empty" class="empty" style="display:none">
+      <div class="icon">📦</div>
+      <div class="msg">Envanter boş. Eşya satın alın veya manuel ekleyin.</div>
+    </div>
+  </div>
+
+  <!-- CSV import section -->
+  <div class="card" id="bulk-section" style="display:none">
+    <div class="card-title">CSV / TXT İçe Aktar</div>
+    <p style="color:var(--text2);font-size:12px;margin-bottom:10px">
+      Format: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;font-family:var(--mono)">name,buy_price,platform</code>&nbsp;
+      Örnek: <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;font-family:var(--mono)">AK-47 | Redline,45.50,Steam</code>
+    </p>
+    <div class="drop-area" onclick="document.getElementById('csv-file').click()">
+      <input type="file" id="csv-file" accept=".csv,.txt" onchange="importCSV(this)">
+      📁 Dosya seçmek için tıklayın (.csv / .txt)
+    </div>
+    <div id="import-log" style="font-family:var(--mono);font-size:12px;color:var(--text2);display:none;background:var(--bg2);padding:10px;border-radius:6px;white-space:pre-wrap;"></div>
+    <button class="btn btn-ghost" onclick="document.getElementById('bulk-section').style.display='none'" style="margin-top:8px">Kapat</button>
+  </div>
+</div>
+
+<!-- AL / SAT -->
+<div id="panel-trade" class="panel">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+    <!-- Satın Al -->
+    <div class="card">
+      <div class="card-title" style="color:var(--steam)">⬇ Satın Al</div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Eşya Adı</label>
+        <input id="buy-name" placeholder="AK-47 | Redline (FN)">
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Birim Fiyat ($)</label>
+          <input id="buy-price" type="number" step="0.01" min="0.01" placeholder="45.00" oninput="updateBuyPreview()">
+        </div>
+        <div class="field" style="max-width:90px">
+          <label>Adet</label>
+          <input id="buy-qty" type="number" step="1" min="1" value="1" oninput="updateBuyPreview()">
+        </div>
+        <div class="field">
+          <label>Platform</label>
+          <select id="buy-platform" onchange="updateBuyPreview()">
+            <option value="Steam">Steam (Steam bakiyesinden)</option>
+            <option value="CSFloat">CSFloat (Cash bakiyesinden)</option>
+          </select>
+        </div>
+      </div>
+      <div class="preview-bar" id="buy-preview"></div>
+      <button class="btn btn-steam" onclick="doBuy()" style="width:100%;margin-top:10px">SATIN AL</button>
+    </div>
+
+    <!-- Sat -->
+    <div class="card">
+      <div class="card-title" style="color:var(--csfloat)">⬆ Sat</div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Eşya Seç</label>
+        <select id="sell-item" onchange="updateSellPreview()">
+          <option value="">— Envanter yükleniyor —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Birim Satış Fiyatı ($)</label>
+          <input id="sell-price" type="number" step="0.01" min="0.01" placeholder="50.00" oninput="updateSellPreview()">
+        </div>
+        <div class="field" style="max-width:90px">
+          <label>Adet</label>
+          <input id="sell-qty" type="number" step="1" min="1" value="1" oninput="updateSellPreview()">
+        </div>
+        <div class="field">
+          <label>Platform</label>
+          <select id="sell-platform" onchange="updateSellPreview()">
+            <option value="Steam">Steam (%<span id="sell-rate-s">15</span> komisyon)</option>
+            <option value="CSFloat">CSFloat (%<span id="sell-rate-c">2</span> komisyon)</option>
+          </select>
+        </div>
+      </div>
+      <div class="preview-bar" id="sell-preview"></div>
+      <button class="btn btn-csfloat" onclick="doSell()" style="width:100%;margin-top:10px">SAT</button>
+    </div>
+  </div>
+</div>
+
+<!-- GEÇMİŞ -->
+<div id="panel-history" class="panel">
+  <div class="card">
+    <div class="card-title">İşlem Geçmişi</div>
+    <div class="btn-row" style="margin-bottom:12px;margin-top:0">
+      <button class="btn btn-ghost" onclick="exportCSV()">📥 CSV İndir</button>
+      <button class="btn btn-danger" onclick="confirmClearHistory()">Geçmişi Temizle</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Zaman</th><th>İşlem</th><th>Eşya</th><th>Platform</th>
+          <th>Satış Fiy.</th><th>Komisyon</th><th>Net</th><th>K/Z</th>
+        </tr></thead>
+        <tbody id="hist-tbody"></tbody>
+      </table>
+    </div>
+    <div id="hist-empty" class="empty" style="display:none">
+      <div class="icon">📋</div><div class="msg">Henüz işlem yapılmadı.</div>
+    </div>
+    <div id="hist-stats" style="margin-top:16px;display:none"></div>
+  </div>
+</div>
+
+<!-- AYARLAR -->
+<div id="panel-settings" class="panel">
+  <div class="card">
+    <div class="card-title">Profil & Bakiye Ayarları</div>
+    <div class="form-row">
+      <div class="field"><label>Kullanıcı Adı</label><input id="set-name" placeholder="Oyuncu"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Steam Bakiyesi ($)</label><input id="set-steam" type="number" step="0.01" min="0" placeholder="500.00"></div>
+      <div class="field"><label>Cash Bakiyesi ($)</label><input id="set-cash" type="number" step="0.01" min="0" placeholder="200.00"></div>
+    </div>
+    <button class="btn btn-accent" onclick="saveSettings()">KAYDET</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Komisyon Oranları</div>
+    <div class="form-row">
+      <div class="field"><label>Steam Komisyonu (%)</label><input id="set-steam-rate" type="number" step="0.1" min="0" max="100" placeholder="15"></div>
+      <div class="field"><label>CSFloat Komisyonu (%)</label><input id="set-cf-rate" type="number" step="0.1" min="0" max="100" placeholder="2"></div>
+    </div>
+    <button class="btn btn-accent" onclick="saveRates()">ORANLARI KAYDET</button>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--red)">Tehlikeli Alan</div>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:12px">Tüm veriler kalıcı olarak silinir. Geri alınamaz.</p>
+    <button class="btn btn-danger" onclick="confirmReset()">TÜMÜNÜ SIFIRLA</button>
+  </div>
+</div>
+
+</main>
+</div><!-- /app -->
+
+<!-- Toast -->
+<div id="notif"></div>
+
+<!-- Universal Modal Overlay -->
+<div id="modal-overlay" onclick="modalOverlayClick(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Başlık</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const KEY = 'cs2trader_v2';
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || defaultState(); }
+  catch { return defaultState(); }
+}
+function defaultState() {
+  return { profile:{name:'Oyuncu',steam:0,cash:0}, rates:{steam:15,csfloat:2}, inventory:[], history:[] };
+}
+function saveState(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
+let state = loadState();
+
+// ─── COMMISSION ───────────────────────────────────────────────────────────────
+function getRate(p) { return p === 'Steam' ? state.rates.steam/100 : state.rates.csfloat/100; }
+function netOf(price,p) { return round2(price*(1-getRate(p))); }
+function comOf(price,p) { return round2(price*getRate(p)); }
+function fmt(n) { return '$'+Math.abs(n).toFixed(2); }
+function fmtSigned(n) { return (n>=0?'+$':'-$')+Math.abs(n).toFixed(2); }
+function round2(n) { return Math.round(n*100)/100; }
+function now() { return new Date().toLocaleString('tr-TR',{hour12:false}).slice(0,16); }
+function esc(s) { const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+function tagClass(p) { return p==='Steam'?'tag-steam':p==='CSFloat'?'tag-csfloat':'tag-other'; }
+function setText(id,v) { const el=document.getElementById(id); if(el) el.textContent=v; }
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function goto(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.nav-btn').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'")) b.classList.add('active');
+  });
+  updateHeader();
+  if(id==='dashboard') renderDashboard();
+  if(id==='inventory')  renderInventory();
+  if(id==='trade')      renderTrade();
+  if(id==='history')    renderHistory();
+  if(id==='settings')   fillSettings();
+  if(id==='calc')       { setText('cr-s-rate','%'+state.rates.steam); setText('cr-c-rate','%'+state.rates.csfloat); }
+}
+
+// ─── HEADER ───────────────────────────────────────────────────────────────────
+function updateHeader() {
+  document.getElementById('hdr-steam').textContent = '$'+state.profile.steam.toFixed(2);
+  document.getElementById('hdr-cash').textContent  = '$'+state.profile.cash.toFixed(2);
+}
+
+// ─── MODAL SYSTEM ─────────────────────────────────────────────────────────────
+let _modalConfirmCb = null;
+
+function openModal(title, bodyHTML, buttons) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML    = bodyHTML;
+  const footer = document.getElementById('modal-footer');
+  footer.innerHTML = '';
+  buttons.forEach(b => {
+    const el = document.createElement('button');
+    el.className   = 'btn ' + (b.cls||'btn-ghost');
+    el.textContent = b.label;
+    el.onclick = () => { if(b.action) b.action(); if(b.close!==false) closeModal(); };
+    footer.appendChild(el);
+  });
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  _modalConfirmCb = null;
+}
+
+function modalOverlayClick(e) {
+  if(e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+/* Onay dialogu */
+function showConfirm(title, msg, onConfirm, isWarn) {
+  openModal(title,
+    `${isWarn?`<div class="modal-warn">⚠ Bu işlem geri alınamaz.</div>`:''}
+     <p>${msg}</p>`,
+    [
+      { label:'İptal', cls:'btn-ghost', close:true },
+      { label:'Onayla', cls: isWarn?'btn-danger':'btn-accent', action: onConfirm }
+    ]
+  );
+}
+
+/* Manuel eşya ekle modal */
+function showManualAddModal() {
+  openModal('Manuel Eşya Ekle',
+    `<div class="field"><label>Eşya Adı</label><input id="ma-name" placeholder="AK-47 | Redline"></div>
+     <div class="field" style="margin-top:10px"><label>Alış Fiyatı ($)</label><input id="ma-price" type="number" step="0.01" min="0" value="0" placeholder="0.00"></div>
+     <div class="field" style="margin-top:10px"><label>Platform</label>
+       <select id="ma-plat">
+         <option value="Steam">Steam</option>
+         <option value="CSFloat">CSFloat</option>
+         <option value="Diğer">Diğer</option>
+       </select>
+     </div>`,
+    [
+      { label:'İptal', cls:'btn-ghost', close:true },
+      { label:'Ekle', cls:'btn-accent', close:false, action: () => {
+        const name  = document.getElementById('ma-name').value.trim();
+        const price = parseFloat(document.getElementById('ma-price').value)||0;
+        const plat  = document.getElementById('ma-plat').value;
+        if(!name) { notify('Eşya adı boş olamaz.','err'); return; }
+        state.inventory.push({name,buyPrice:price,platform:plat,date:now()});
+        saveState(state); renderInventory(); closeModal();
+        notify(`'${name}' envantere eklendi.`,'ok');
+      }}
+    ]
+  );
+  setTimeout(()=>document.getElementById('ma-name')&&document.getElementById('ma-name').focus(),100);
+}
+
+/* Eşya sil modal */
+function removeItem(i) {
+  const item = state.inventory[i];
+  if(!item) return;
+  showConfirm(
+    'Eşyayı Sil',
+    `<strong style="color:var(--text)">${esc(item.name)}</strong> envanterden silinecek.`,
+    () => {
+      state.inventory.splice(i,1);
+      saveState(state); renderInventory();
+      notify('Eşya silindi.','ok');
+    }, true
+  );
+}
+
+/* Toplu silme modal */
+function bulkDelete() {
+  const idxs = getCheckedIndexes();
+  if(!idxs.length) return;
+  showConfirm(
+    'Toplu Silme',
+    `Seçili <strong style="color:var(--accent)">${idxs.length} eşya</strong> envanterden silinecek.`,
+    () => {
+      const sorted = [...idxs].sort((a,b)=>b-a);
+      sorted.forEach(i=>state.inventory.splice(i,1));
+      saveState(state); renderInventory(); notify(`${idxs.length} eşya silindi.`,'ok');
+    }, true
+  );
+}
+
+/* Toplu satış modal */
+function bulkSell(platform) {
+  const idxs = getCheckedIndexes();
+  if(!idxs.length) return;
+  const rate = state.rates[platform==='Steam'?'steam':'csfloat'];
+  openModal(`Toplu Sat — ${platform}`,
+    `<p style="margin-bottom:12px">Seçili <strong style="color:var(--accent)">${idxs.length} eşya</strong> ${platform}'de satılacak.</p>
+     <div class="field">
+       <label>Birim Satış Fiyatı ($) — tüm eşyalar için aynı</label>
+       <input id="bs-price" type="number" step="0.01" min="0.01" placeholder="5.00">
+     </div>
+     <div style="margin-top:10px;font-size:12px;color:var(--text2)">Komisyon: %${rate} (${platform})</div>
+     <div class="modal-divider"></div>
+     <div id="bs-preview" style="font-size:13px;color:var(--text2)">Fiyat girerek önizleme görün.</div>`,
+    [
+      { label:'İptal', cls:'btn-ghost', close:true },
+      { label:`${platform}'de Sat`, cls: platform==='Steam'?'btn-steam':'btn-csfloat', close:false, action: () => {
+        const price = parseFloat(document.getElementById('bs-price').value);
+        if(!price||price<=0) { notify('Geçerli bir fiyat girin.','err'); return; }
+        const balKey = platform==='Steam'?'steam':'cash';
+        let totalNet = 0, totalPnl = 0;
+        const sorted = [...idxs].sort((a,b)=>b-a);
+        sorted.forEach(i => {
+          const item = state.inventory[i];
+          const net  = netOf(price, platform);
+          const pnl  = round2(net - item.buyPrice);
+          state.profile[balKey] = round2(state.profile[balKey] + net);
+          state.history.push({time:now(),type:'SATIŞ',name:item.name,platform,price,net,buyPrice:item.buyPrice,pnl});
+          totalNet += net; totalPnl += pnl;
+          state.inventory.splice(i,1);
+        });
+        saveState(state); updateHeader(); renderInventory(); closeModal();
+        notify(`${idxs.length} eşya satıldı. Toplam net: $${round2(totalNet).toFixed(2)} | K/Z: ${fmtSigned(round2(totalPnl))}`,'ok');
+      }}
+    ]
+  );
+  // Canlı önizleme
+  setTimeout(()=>{
+    const inp = document.getElementById('bs-price');
+    if(inp) inp.addEventListener('input',()=>{
+      const price = parseFloat(inp.value);
+      const prev  = document.getElementById('bs-preview');
+      if(!price||!prev) return;
+      const net   = netOf(price,platform);
+      const com   = comOf(price,platform);
+      const total = round2(net*idxs.length);
+      prev.innerHTML = `Birim Net: <span style="color:var(--green)">$${net.toFixed(2)}</span> &nbsp;|&nbsp; Komisyon/birim: <span style="color:var(--red)">-$${com.toFixed(2)}</span><br>Toplam Net (<span style="color:var(--accent)">${idxs.length} eşya</span>): <strong style="color:var(--green)">$${total.toFixed(2)}</strong>`;
+    });
+    inp&&inp.focus();
+  },100);
+}
+
+/* Geçmişi temizle modal */
+function confirmClearHistory() {
+  showConfirm('Geçmişi Temizle','Tüm işlem geçmişi kalıcı olarak silinecek.',
+    ()=>{ state.history=[]; saveState(state); renderHistory(); notify('Geçmiş temizlendi.','ok'); }, true);
+}
+
+/* Sıfırla modal */
+function confirmReset() {
+  openModal('Tüm Verileri Sıfırla',
+    `<div class="modal-warn">⚠ Bu işlem geri alınamaz!</div>
+     <p>Bakiyeniz, envanteriniz ve işlem geçmişinizin tamamı silinecek.</p>
+     <p style="margin-top:8px">Onaylamak için aşağıya <strong style="color:var(--red)">SİL</strong> yazın:</p>
+     <div class="field" style="margin-top:10px"><input id="reset-confirm" placeholder="SİL"></div>`,
+    [
+      { label:'Vazgeç', cls:'btn-ghost', close:true },
+      { label:'SIFIRLA', cls:'btn-danger', close:false, action:()=>{
+        const val = document.getElementById('reset-confirm').value.trim().toUpperCase();
+        if(val !== 'SİL' && val !== 'SIL') { notify('Onay metni hatalı.','err'); return; }
+        state = defaultState(); saveState(state); updateHeader(); closeModal();
+        notify('Tüm veriler sıfırlandı.','ok');
+      }}
+    ]
+  );
+}
+
+// ─── CHECKBOX / BULK SELECTION ────────────────────────────────────────────────
+function getCheckedIndexes() {
+  return [...document.querySelectorAll('.inv-chk:checked')].map(c=>parseInt(c.dataset.idx));
+}
+
+function updateBulkBar() {
+  const count = document.querySelectorAll('.inv-chk:checked').length;
+  const bar   = document.getElementById('bulk-bar');
+  const total = document.querySelectorAll('.inv-chk').length;
+  bar.classList.toggle('visible', count>0);
+  document.getElementById('bulk-count').textContent = count+' seçili';
+  const chkAll = document.getElementById('chk-all');
+  if(chkAll) { chkAll.indeterminate = count>0&&count<total; chkAll.checked = count===total&&total>0; }
+}
+
+function toggleSelectAll(checked) {
+  document.querySelectorAll('.inv-chk').forEach(c=>c.checked=checked);
+  updateBulkBar();
+}
+
+function clearSelection() {
+  document.querySelectorAll('.inv-chk').forEach(c=>c.checked=false);
+  const ca=document.getElementById('chk-all'); if(ca){ca.checked=false;ca.indeterminate=false;}
+  updateBulkBar();
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const inv=state.inventory, hist=state.history;
+  const sales=hist.filter(h=>h.type==='SATIŞ'&&h.pnl!=null);
+  const pnl=round2(sales.reduce((a,h)=>a+h.pnl,0));
+  const wins=sales.filter(h=>h.pnl>=0).length;
+  const cost=round2(inv.reduce((a,i)=>a+i.buyPrice,0));
+  setText('s-steam','$'+state.profile.steam.toFixed(2));
+  setText('s-cash','$'+state.profile.cash.toFixed(2));
+  setText('s-inv',inv.length);
+  setText('s-cost','$'+cost.toFixed(2));
+  const pnlEl=document.getElementById('s-pnl');
+  pnlEl.textContent=fmtSigned(pnl);
+  pnlEl.className='val '+(pnl>=0?'green':'');
+  pnlEl.style.color=pnl<0?'var(--red)':'';
+  setText('s-wr',sales.length?`${wins}/${sales.length} (${Math.round(wins/sales.length*100)}%)`:'—');
+  const tbody=document.getElementById('dash-hist');
+  const recent=[...hist].reverse().slice(0,10);
+  if(!recent.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:24px">İşlem yok</td></tr>';return;}
+  tbody.innerHTML=recent.map(h=>{
+    const ks=h.pnl!=null?`<span class="${h.pnl>=0?'pos':'neg'}">${fmtSigned(h.pnl)}</span>`:'—';
+    return `<tr><td class="mono" style="color:var(--text2);font-size:12px">${h.time}</td>
+      <td><span class="tag ${h.type==='ALIŞ'?'tag-buy':'tag-sell'}">${h.type}</span></td>
+      <td>${esc(h.name)}</td><td><span class="tag ${tagClass(h.platform)}">${h.platform}</span></td>
+      <td class="mono">${fmt(h.net)}</td><td>${ks}</td></tr>`;
+  }).join('');
+}
+
+// ─── INVENTORY ────────────────────────────────────────────────────────────────
+function renderInventory() {
+  const inv=state.inventory;
+  const tbody=document.getElementById('inv-tbody');
+  const empty=document.getElementById('inv-empty');
+  clearSelection();
+  if(!inv.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=inv.map((item,i)=>{
+    const sNet=netOf(item.buyPrice,'Steam');
+    const cNet=netOf(item.buyPrice,'CSFloat');
+    return `<tr id="inv-row-${i}">
+      <td><input type="checkbox" class="inv-chk" data-idx="${i}" onchange="updateBulkBar()"></td>
+      <td class="mono" style="color:var(--text3)">${i+1}</td>
+      <td>${esc(item.name)}</td>
+      <td class="mono">${fmt(item.buyPrice)}</td>
+      <td><span class="tag ${tagClass(item.platform)}">${item.platform}</span></td>
+      <td class="mono" style="color:var(--steam)">${fmt(sNet)}</td>
+      <td class="mono" style="color:var(--csfloat)">${fmt(cNet)}</td>
+      <td style="color:var(--text3);font-size:12px">${item.date}</td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="removeItem(${i})">Sil</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function showCsvImport() {
+  const s=document.getElementById('bulk-section');
+  s.style.display=s.style.display==='none'?'block':'none';
+}
+
+function importCSV(input) {
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split(/\r?\n/);
+    let imported=0,skipped=0,log=[];
+    lines.forEach((line,idx)=>{
+      if(!line.trim()) return;
+      const parts=line.split(',');
+      if(parts.length<2){skipped++;return;}
+      const name=parts[0].trim();
+      if(idx===0&&['name','esya','isim','ad'].includes(name.toLowerCase())) return;
+      const price=parseFloat(parts[1].trim().replace(',','.'));
+      if(!name||isNaN(price)){skipped++;log.push(`Satır ${idx+1} atlandı`);return;}
+      const plat=parts[2]?parts[2].trim():'Diğer';
+      state.inventory.push({name,buyPrice:price,platform:plat,date:now()});
+      imported++;
+    });
+    saveState(state); renderInventory();
+    const logEl=document.getElementById('import-log');
+    logEl.style.display='block';
+    logEl.textContent=`✓ ${imported} eşya içe aktarıldı.`+(skipped?`\n${skipped} satır atlandı.`:'')+(log.length?'\n'+log.join('\n'):'');
+    notify(`${imported} eşya içe aktarıldı.`,'ok');
+  };
+  reader.readAsText(file,'utf-8');
+  input.value='';
+}
+
+// ─── TRADE ────────────────────────────────────────────────────────────────────
+function renderTrade() {
+  const sel=document.getElementById('sell-item');
+  sel.innerHTML=state.inventory.length
+    ? state.inventory.map((item,i)=>`<option value="${i}">${esc(item.name)} — Alış: $${item.buyPrice.toFixed(2)}</option>`).join('')
+    : '<option value="">— Envanter boş —</option>';
+  // Max qty for sell
+  const maxEl=document.getElementById('sell-qty');
+  if(maxEl) maxEl.max=state.inventory.length||1;
+  updateBuyPreview(); updateSellPreview();
+}
+
+function updateBuyPreview() {
+  const price=parseFloat(document.getElementById('buy-price').value);
+  const qty=Math.max(1,parseInt(document.getElementById('buy-qty').value)||1);
+  const plat=document.getElementById('buy-platform').value;
+  const bal=plat==='Steam'?state.profile.steam:state.profile.cash;
+  const prev=document.getElementById('buy-preview');
+  if(!price){prev.innerHTML='';return;}
+  const total=round2(price*qty);
+  const enough=total<=bal;
+  prev.innerHTML=`Birim: <span class="mono">$${price.toFixed(2)}</span> × ${qty} = <strong class="mono" style="color:${enough?'var(--text)':'var(--red)'}">$${total.toFixed(2)}</strong>
+    &nbsp;│&nbsp; Bakiye: <span style="color:${plat==='Steam'?'var(--steam)':'var(--csfloat)'}">$${bal.toFixed(2)}</span>
+    &nbsp;→&nbsp; Kalan: <span style="color:${enough?'var(--green)':'var(--red)'}">$${round2(bal-total).toFixed(2)}</span>
+    ${!enough?'<br><span style="color:var(--red)">✗ Yetersiz bakiye!</span>':''}`;
+}
+
+function doBuy() {
+  const name=document.getElementById('buy-name').value.trim();
+  const price=parseFloat(document.getElementById('buy-price').value);
+  const qty=Math.max(1,parseInt(document.getElementById('buy-qty').value)||1);
+  const plat=document.getElementById('buy-platform').value;
+  if(!name){notify('Eşya adı boş olamaz.','err');return;}
+  if(!price||price<=0){notify('Geçersiz fiyat.','err');return;}
+  const balKey=plat==='Steam'?'steam':'cash';
+  const total=round2(price*qty);
+  if(state.profile[balKey]<total){notify(`Yetersiz bakiye! Gereken: $${total.toFixed(2)}`,'err');return;}
+  state.profile[balKey]=round2(state.profile[balKey]-total);
+  for(let q=0;q<qty;q++){
+    state.inventory.push({name,buyPrice:price,platform:plat,date:now()});
+    state.history.push({time:now(),type:'ALIŞ',name,platform:plat,price,net:price,buyPrice:0,pnl:null});
+  }
+  saveState(state); updateHeader(); renderTrade();
+  document.getElementById('buy-name').value='';
+  document.getElementById('buy-price').value='';
+  document.getElementById('buy-qty').value='1';
+  notify(`${qty}x '${name}' satın alındı. Toplam: $${total.toFixed(2)}`,'ok');
+}
+
+function updateSellPreview() {
+  const price=parseFloat(document.getElementById('sell-price').value);
+  const qty=Math.max(1,parseInt(document.getElementById('sell-qty').value)||1);
+  const plat=document.getElementById('sell-platform').value;
+  const idx=parseInt(document.getElementById('sell-item').value);
+  const prev=document.getElementById('sell-preview');
+  if(!price||isNaN(idx)||!state.inventory[idx]){prev.innerHTML='';return;}
+  const item=state.inventory[idx];
+  const net=netOf(price,plat);
+  const com=comOf(price,plat);
+  const pnl=round2(net-item.buyPrice);
+  const totalNet=round2(net*qty);
+  const totalPnl=round2(pnl*qty);
+  const pc=pnl>=0?'var(--green)':'var(--red)';
+  prev.innerHTML=`Net/birim: <span class="mono" style="color:var(--green)">$${net.toFixed(2)}</span>
+    &nbsp;│&nbsp; K/Z birim: <span style="color:${pc}">${fmtSigned(pnl)}</span>
+    &nbsp;│&nbsp; ${qty>1?`Toplam Net (×${qty}): <strong class="mono" style="color:var(--green)">$${totalNet.toFixed(2)}</strong> &nbsp;│&nbsp; Toplam K/Z: <span style="color:${totalPnl>=0?'var(--green)':'var(--red)'}">${fmtSigned(totalPnl)}</span>`:''}`;
+}
+
+function doSell() {
+  const idx=parseInt(document.getElementById('sell-item').value);
+  const price=parseFloat(document.getElementById('sell-price').value);
+  const qty=Math.max(1,parseInt(document.getElementById('sell-qty').value)||1);
+  const plat=document.getElementById('sell-platform').value;
+  if(isNaN(idx)||!state.inventory[idx]){notify('Envanter boş veya eşya seçilmedi.','err');return;}
+  if(!price||price<=0){notify('Geçersiz satış fiyatı.','err');return;}
+
+  const baseItem=state.inventory[idx];
+  const name=baseItem.name;
+
+  // Aynı isimden qty kadar eşya bul
+  const matchingIdxs=[];
+  for(let i=0;i<state.inventory.length&&matchingIdxs.length<qty;i++){
+    if(state.inventory[i].name===name) matchingIdxs.push(i);
+  }
+  if(matchingIdxs.length<qty){
+    notify(`Envanterinizde '${name}' isimli ${qty} adet eşya yok (mevcut: ${matchingIdxs.length}).`,'err');
+    return;
+  }
+
+  const balKey=plat==='Steam'?'steam':'cash';
+  let totalNet=0, totalPnl=0;
+  const sorted=[...matchingIdxs].sort((a,b)=>b-a);
+  sorted.forEach(i=>{
+    const item=state.inventory[i];
+    const net=netOf(price,plat);
+    const pnl=round2(net-item.buyPrice);
+    state.profile[balKey]=round2(state.profile[balKey]+net);
+    state.history.push({time:now(),type:'SATIŞ',name:item.name,platform:plat,price,net,buyPrice:item.buyPrice,pnl});
+    totalNet+=net; totalPnl+=pnl;
+    state.inventory.splice(i,1);
+  });
+  saveState(state); updateHeader(); renderTrade();
+  document.getElementById('sell-price').value='';
+  document.getElementById('sell-qty').value='1';
+  notify(`${qty}x satış tamam. Toplam net: $${round2(totalNet).toFixed(2)} | K/Z: ${fmtSigned(round2(totalPnl))}`,'ok');
+}
+
+// ─── HISTORY ──────────────────────────────────────────────────────────────────
+function renderHistory() {
+  const hist=state.history;
+  const tbody=document.getElementById('hist-tbody');
+  const empty=document.getElementById('hist-empty');
+  const stats=document.getElementById('hist-stats');
+  if(!hist.length){tbody.innerHTML='';empty.style.display='block';stats.style.display='none';return;}
+  empty.style.display='none';
+  tbody.innerHTML=[...hist].reverse().map(h=>{
+    const com=h.type==='SATIŞ'?comOf(h.price,h.platform):0;
+    const ks=h.pnl!=null?`<span class="${h.pnl>=0?'pos':'neg'}">${fmtSigned(h.pnl)}</span>`:'—';
+    return `<tr>
+      <td class="mono" style="color:var(--text2);font-size:12px">${h.time}</td>
+      <td><span class="tag ${h.type==='ALIŞ'?'tag-buy':'tag-sell'}">${h.type}</span></td>
+      <td>${esc(h.name)}</td>
+      <td><span class="tag ${tagClass(h.platform)}">${h.platform}</span></td>
+      <td class="mono">${h.price?'$'+h.price.toFixed(2):'—'}</td>
+      <td class="mono neg">${com?'-$'+com.toFixed(2):'—'}</td>
+      <td class="mono pos">$${h.net.toFixed(2)}</td>
+      <td>${ks}</td>
+    </tr>`;
+  }).join('');
+  const sales=hist.filter(h=>h.type==='SATIŞ'&&h.pnl!=null);
+  if(!sales.length){stats.style.display='none';return;}
+  const total=round2(sales.reduce((a,h)=>a+h.pnl,0));
+  const wins=sales.filter(h=>h.pnl>=0).length;
+  const best=sales.reduce((a,h)=>h.pnl>a.pnl?h:a);
+  const worst=sales.reduce((a,h)=>h.pnl<a.pnl?h:a);
+  const tc=t=>t>=0?'var(--green)':'var(--red)';
+  stats.style.display='block';
+  stats.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+    <div class="stat-tile"><div class="lbl">Toplam K/Z</div><div class="val" style="color:${tc(total)};font-family:var(--mono)">${fmtSigned(total)}</div></div>
+    <div class="stat-tile"><div class="lbl">Win Rate</div><div class="val amber">${wins}/${sales.length} (${Math.round(wins/sales.length*100)}%)</div></div>
+    <div class="stat-tile"><div class="lbl">En İyi</div><div class="val" style="color:var(--green);font-size:13px;font-family:var(--mono)">${esc(best.name)}<br>${fmtSigned(best.pnl)}</div></div>
+    <div class="stat-tile"><div class="lbl">En Kötü</div><div class="val" style="color:var(--red);font-size:13px;font-family:var(--mono)">${esc(worst.name)}<br>${fmtSigned(worst.pnl)}</div></div>
+  </div>`;
+}
+
+function exportCSV() {
+  if(!state.history.length){notify('Geçmiş boş.','err');return;}
+  const cols=['zaman','islem','esya','platform','fiyat','net','alis_fiyati','kar'];
+  const rows=state.history.map(h=>
+    [h.time,h.type,`"${h.name}"`,h.platform,h.price??'',h.net,h.buyPrice??'',h.pnl??''].join(',')
+  );
+  const blob=new Blob(['\uFEFF'+[cols.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`cs2_gecmis_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  notify('CSV indirildi.','ok');
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function fillSettings() {
+  document.getElementById('set-name').value      =state.profile.name;
+  document.getElementById('set-steam').value     =state.profile.steam.toFixed(2);
+  document.getElementById('set-cash').value      =state.profile.cash.toFixed(2);
+  document.getElementById('set-steam-rate').value=state.rates.steam;
+  document.getElementById('set-cf-rate').value   =state.rates.csfloat;
+}
+function saveSettings() {
+  const name=document.getElementById('set-name').value.trim();
+  const steam=parseFloat(document.getElementById('set-steam').value);
+  const cash=parseFloat(document.getElementById('set-cash').value);
+  if(!name){notify('İsim boş olamaz.','err');return;}
+  if(isNaN(steam)||isNaN(cash)){notify('Geçersiz bakiye.','err');return;}
+  state.profile={name,steam:round2(steam),cash:round2(cash)};
+  saveState(state); updateHeader(); notify('Profil kaydedildi.','ok');
+}
+function saveRates() {
+  const sr=parseFloat(document.getElementById('set-steam-rate').value);
+  const cr=parseFloat(document.getElementById('set-cf-rate').value);
+  if(isNaN(sr)||isNaN(cr)){notify('Geçersiz oran.','err');return;}
+  state.rates={steam:sr,csfloat:cr};
+  saveState(state); notify('Oranlar kaydedildi.','ok');
+}
+
+// ─── COMMISSION CALC ──────────────────────────────────────────────────────────
+function runCalc() {
+  const price=parseFloat(document.getElementById('calc-price').value);
+  const buyRaw=document.getElementById('calc-buy').value;
+  const buy=buyRaw!==''?parseFloat(buyRaw):null;
+  const qty=Math.max(1,parseInt(document.getElementById('calc-qty').value)||1);
+  if(!price||price<=0) return;
+
+  const sr=state.rates.steam, cr=state.rates.csfloat;
+  setText('cr-s-rate','%'+sr); setText('cr-c-rate','%'+cr);
+
+  const sNetUnit=netOf(price,'Steam'), sComUnit=comOf(price,'Steam');
+  const cNetUnit=netOf(price,'CSFloat'), cComUnit=comOf(price,'CSFloat');
+  const sNetTotal=round2(sNetUnit*qty), sComTotal=round2(sComUnit*qty), sPriceTotal=round2(price*qty);
+  const cNetTotal=round2(cNetUnit*qty), cComTotal=round2(cComUnit*qty), cPriceTotal=round2(price*qty);
+
+  setText('cr-s-unit','$'+price.toFixed(2)); setText('cr-s-qty',qty+'x');
+  setText('cr-s-price','$'+sPriceTotal.toFixed(2));
+  setText('cr-s-com','-$'+sComTotal.toFixed(2));
+  setText('cr-s-net','$'+sNetTotal.toFixed(2));
+  setText('cr-c-unit','$'+price.toFixed(2)); setText('cr-c-qty',qty+'x');
+  setText('cr-c-price','$'+cPriceTotal.toFixed(2));
+  setText('cr-c-com','-$'+cComTotal.toFixed(2));
+  setText('cr-c-net','$'+cNetTotal.toFixed(2));
+
+  const qtyRowDisplay=qty>1?'':'none';
+  document.getElementById('cr-s-qty-row').style.display=qtyRowDisplay;
+  document.getElementById('cr-c-qty-row').style.display=qtyRowDisplay;
+
+  if(buy!=null&&!isNaN(buy)) {
+    const sPnl=round2(sNetTotal-buy*qty), cPnl=round2(cNetTotal-buy*qty);
+    const pnlEl=n=>`<span style="color:${n>=0?'var(--green)':'var(--red)'}">${fmtSigned(n)}</span>`;
+    document.getElementById('cr-s-pnl').innerHTML=pnlEl(sPnl);
+    document.getElementById('cr-c-pnl').innerHTML=pnlEl(cPnl);
+    document.getElementById('cr-s-pnl-row').style.display='';
+    document.getElementById('cr-c-pnl-row').style.display='';
+  } else {
+    document.getElementById('cr-s-pnl-row').style.display='none';
+    document.getElementById('cr-c-pnl-row').style.display='none';
+  }
+
+  const diff=round2(cNetTotal-sNetTotal);
+  const cmp=document.getElementById('calc-compare');
+  if(diff>0) cmp.innerHTML=`💡 CSFloat sizi <strong style="color:var(--csfloat)">$${diff.toFixed(2)}</strong> daha fazla kazandırır.`;
+  else if(diff<0) cmp.innerHTML=`💡 Steam sizi <strong style="color:var(--steam)">$${Math.abs(diff).toFixed(2)}</strong> daha fazla kazandırır.`;
+  else cmp.textContent='Her iki platform eşit kazandırır.';
+
+  document.getElementById('calc-result').style.display='block';
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let notifTimer;
+function notify(msg,type='ok') {
+  const el=document.getElementById('notif');
+  el.textContent=(type==='ok'?'✓ ':'✗ ')+msg;
+  el.className='show '+type;
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>el.className='',3500);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+updateHeader();
+renderDashboard();
+</script>
+</body>
+</html>
